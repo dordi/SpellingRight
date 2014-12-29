@@ -54,19 +54,23 @@ public class Learn extends Activity implements OnClickListener {
                 } else if (input.getText().toString().equals("")) {
                     Toast.makeText(this, "Write something", Toast.LENGTH_SHORT).show();
                 } else {
-                    Spannable WordtoSpan = new SpannableString(input.getText().toString());
-                    WordtoSpan.setSpan(new ForegroundColorSpan(Color.RED), checkInput(input.getText().toString(), "fight"), checkInput(input.getText().toString(), "fight") + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    result.setText(WordtoSpan);
+                    result.setText(checkInput(input.getText().toString(), "fight"));
                 }
         }
 
     }
 
-    public int checkInput(String a, String b) {
-        int i = 0;
-        while (i < Math.min(a.length(), b.length()) && a.charAt(i) == b.charAt(i)) {
-            i++;
+    public Spannable checkInput(String a, String b) {
+        int i = 0, j = 0;
+        for (int k = 0; k < Math.min(a.length(), b.length()); k++) {
+            if (a.charAt(k) != b.charAt(k) && j == 0) {
+                i = k;
+                j = i;
+            } else if (a.charAt(k) != b.charAt(k)) j = k;
+            if (a.length() != b.length()) j = a.length() - 1;
         }
-        return i;
+        Spannable WordtoSpan = new SpannableString(input.getText().toString());
+        WordtoSpan.setSpan(new ForegroundColorSpan(Color.RED), i, j + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return WordtoSpan;
     }
 }
