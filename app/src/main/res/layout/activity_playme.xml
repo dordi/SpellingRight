@@ -8,25 +8,24 @@
         android:id="@+id/group"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:orientation="horizontal"
-        android:gravity="center">
+        android:gravity="center"
+        android:orientation="horizontal">
 
 
-
-
-            <Button
+        <Button
                 android:id="@+id/learn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+            android:onClick="onClick"
                 android:text="Let's learn"
-                android:onClick="onClick"/>
+            android:textColor="#ff7e101a" />
 
-            <Button
+        <Button
                 android:id="@+id/manDB"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Manage DB"
-                android:onClick="onClick"/>
+            android:onClick="onClick"
+            android:text="Manage DB" />
 
 
     </LinearLayout>

@@ -1,134 +1,136 @@
 package com.example.douraid.spellingright;
 
-import android.app.ListActivity;
+import android.app.Activity;
+import android.app.AlertDialog.Builder;
+import android.content.Context;
 import android.database.Cursor;
-import android.media.MediaPlayer;
-import android.net.Uri;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
-import android.widget.Toast;
-
-import BD.BDAdapter;
 
 
-public class BDManager extends ListActivity implements OnClickListener {
+public class BDManager extends Activity implements OnClickListener {
+
+    EditText editRollno, editPath, editwordspell;
+    Button btnAdd, btnDelete, btnModify, btnView, btnViewAll, btnShowInfo;
+    SQLiteDatabase db;
 
     /**
      * Called when the activity is first created.
      */
-
-    BDAdapter db;
-    EditText text;
-    EditText text1;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main2);
-        getListView().setOnCreateContextMenuListener(this);
-        findViewById(R.id.button1).setOnClickListener(this);
-        text = ((EditText) findViewById(R.id.text1));
-        text1 = ((EditText) findViewById(R.id.text2));
-        db = new BDAdapter(this);
-        db.open();
-        DataBind();
+        editRollno = (EditText) findViewById(R.id.editRollno);
+        editPath = (EditText) findViewById(R.id.editName);
+        editwordspell = (EditText) findViewById(R.id.editMarks);
+        btnAdd = (Button) findViewById(R.id.btnAdd);
+        btnDelete = (Button) findViewById(R.id.btnDelete);
+        btnModify = (Button) findViewById(R.id.btnModify);
+        btnView = (Button) findViewById(R.id.btnView);
+        btnViewAll = (Button) findViewById(R.id.btnViewAll);
+        btnShowInfo = (Button) findViewById(R.id.btnShowInfo);
+        btnAdd.setOnClickListener(this);
+        btnDelete.setOnClickListener(this);
+        btnModify.setOnClickListener(this);
+        btnView.setOnClickListener(this);
+        btnViewAll.setOnClickListener(this);
+        btnShowInfo.setOnClickListener(this);
+        db = openOrCreateDatabase("StudentDB", Context.MODE_PRIVATE, null);
+        db.execSQL("CREATE TABLE IF NOT EXISTS student(rollno VARCHAR,name VARCHAR,marks VARCHAR);");
     }
 
-    @Override // Création du menu principal
-    public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, 100, 0, "Tout effacer");
-        return true;
-    }
-
-    @Override // Selection d'un item du menu
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case 100:
-                db.Truncate();
-                DataBind();
-                break;
+    public void onClick(View view) {
+        if (view == btnAdd) {
+            if (editRollno.getText().toString().trim().length() == 0 ||
+                    editPath.getText().toString().trim().length() == 0 ||
+                    editwordspell.getText().toString().trim().length() == 0) {
+                showMessage("Error", "Please enter all values");
+                return;
+            }
+            db.execSQL("INSERT INTO student VALUES('" + editRollno.getText() + "','" + editPath.getText() +
+                    "','" + editwordspell.getText() + "');");
+            showMessage("Success", "Record added");
+            clearText();
         }
-        return true;
-    }
-
-    @Override // Selection d'un item de la liste
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        Cursor cursor = (Cursor) l.getAdapter().getItem(position);
-        String wordspell = cursor.getString(cursor.getColumnIndex("wordspell"));
-        Toast.makeText(this, "Item id " + id + " : " + wordspell, Toast.LENGTH_SHORT).show();
-        super.onListItemClick(l, v, position, id);
-    }
-
-    @Override // Creation du menu contextuel
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        menu.setHeaderTitle("Actions");
-        menu.add(0, 100, 0, "Supprimer");
-        menu.add(0, 200, 0, "Editer");
-        menu.add(0, 300, 0, "Lire");
-    }
-
-
-    @Override // Selection d'un item du menu contextuel
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        switch (item.getItemId()) {
-            case 100:
-                db.supprimerword(info.id);
-                DataBind();
-                break;
-            case 200:
-                Toast.makeText(this, "" + info.id, Toast.LENGTH_SHORT).show();
-                break;
-            case 300:
-                Cursor c = db.getpathandword(info.id);
-                Uri myUri = Uri.parse(c.getString(-1));
-                try {
-                    MediaPlayer mp = new MediaPlayer();
-                    mp.setDataSource(this, myUri);
-                    mp.prepare();
-                    mp.start();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(this, "file doesn't exist", Toast.LENGTH_SHORT).show();
-                }
-                break;
-
+        if (view == btnDelete) {
+            if (editRollno.getText().toString().trim().length() == 0) {
+                showMessage("Error", "Please enter Rollno");
+                return;
+            }
+            Cursor c = db.rawQuery("SELECT * FROM student WHERE rollno='" + editRollno.getText() + "'", null);
+            if (c.moveToFirst()) {
+                db.execSQL("DELETE FROM student WHERE rollno='" + editRollno.getText() + "'");
+                showMessage("Success", "Record Deleted");
+            } else {
+                showMessage("Error", "Invalid Rollno");
+            }
+            clearText();
         }
-        return true;
+        if (view == btnModify) {
+            if (editRollno.getText().toString().trim().length() == 0) {
+                showMessage("Error", "Please enter Rollno");
+                return;
+            }
+            Cursor c = db.rawQuery("SELECT * FROM student WHERE rollno='" + editRollno.getText() + "'", null);
+            if (c.moveToFirst()) {
+                db.execSQL("UPDATE student SET name='" + editPath.getText() + "',marks='" + editwordspell.getText() +
+                        "' WHERE rollno='" + editRollno.getText() + "'");
+                showMessage("Success", "Record Modified");
+            } else {
+                showMessage("Error", "Invalid Rollno");
+            }
+            clearText();
+        }
+        if (view == btnView) {
+            if (editRollno.getText().toString().trim().length() == 0) {
+                showMessage("Error", "Please enter id");
+                return;
+            }
+            Cursor c = db.rawQuery("SELECT * FROM student WHERE rollno='" + editRollno.getText() + "'", null);
+            if (c.moveToFirst()) {
+                editPath.setText(c.getString(1));
+                editwordspell.setText(c.getString(2));
+            } else {
+                showMessage("Error", "Invalid id");
+                clearText();
+            }
+        }
+        if (view == btnViewAll) {
+            Cursor c = db.rawQuery("SELECT * FROM student", null);
+            if (c.getCount() == 0) {
+                showMessage("Error", "No records found");
+                return;
+            }
+            StringBuffer buffer = new StringBuffer();
+            while (c.moveToNext()) {
+                buffer.append("ID: " + c.getString(0) + "\n");
+                buffer.append("Word Spell: " + c.getString(2) + "\n");
+                buffer.append("Path: " + c.getString(1) + "\n\n");
+            }
+            showMessage("Words Details", buffer.toString());
+        }
+        if (view == btnShowInfo) {
+            showMessage("Word Management Application", "Developed By Dordi");
+        }
     }
 
-    @Override
-    protected void onDestroy() {
-        db.close();
-        super.onDestroy();
+    public void showMessage(String title, String message) {
+        Builder builder = new Builder(this);
+        builder.setCancelable(true);
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.show();
     }
 
-    public void DataBind() {
-        Cursor c = db.recupererLaListeDeswords();
-        startManagingCursor(c);
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
-                R.layout.list_item2, c, new String[]{"path", "wordspell"},
-                new int[]{R.id.textpath, R.id.textwordspell});
-        setListAdapter(adapter);
+    public void clearText() {
+        editRollno.setText("");
+        editPath.setText("");
+        editwordspell.setText("");
+        editRollno.requestFocus();
     }
-
-    @Override
-    public void onClick(View v) {
-        if (!text.getText().toString().equals("") && !text1.getText().toString().equals("")) {
-            db.insererUnword(text.getText().toString(), text1.getText().toString());
-            DataBind();
-        } else Toast.makeText(this, "you have'nt enter any thing", Toast.LENGTH_SHORT).show();
-    }
-
 }

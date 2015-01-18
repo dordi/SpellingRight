@@ -2,7 +2,6 @@ package com.example.douraid.spellingright;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
 
@@ -24,15 +23,12 @@ public class Play_me extends Activity implements View.OnClickListener {
             case R.id.learn:
                 i = new Intent(Play_me.this, Learn.class);
                 startActivity(i);
-                overridePendingTransition(R.anim.right_in, R.anim.left_out);
-                finish();
+                overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
                 break;
             case R.id.manDB:
-                finishActivity(0);
-                i = new Intent(this.getBaseContext(), BDManager.class);
-                startActivity(i);
+                Intent a = new Intent(getApplicationContext(), BDManager.class);
+                startActivity(a);
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                finish();
                 break;
         }
     }
